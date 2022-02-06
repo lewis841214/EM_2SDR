@@ -1,0 +1,14 @@
+*~
+*.pyc
+/tomosipo.egg-info/
+htmlcov/
+/doc/_build
+/doc/_static
+/public/
+/doc/ref/_autosummary/
+doc/ref/tomosipo*.rst
+*.h5
+*.pkl
+data/
+data/*.h5
+snap_shot/

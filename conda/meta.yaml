@@ -1,0 +1,42 @@
+{% set data = load_setup_py_data() %}
+
+package:
+    name: tomosipo
+    # If this release is tagged, use bare version number. Otherwise,
+    # append 'dev' to version number.
+    # This scheme complies with PEP-386:
+    # https://www.python.org/dev/peps/pep-0386/
+    {% if environ.get('GIT_DESCRIBE_NUMBER', '0') == '0' %}
+    version: {{ data['version'] }}
+    {% else %}
+    version: {{ data['version'] + "dev" }}
+    {% endif %}
+
+
+source:
+    git_url: ../
+
+build:
+    number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+    noarch: python
+
+requirements:
+    host:
+        - python >=3.6
+        - astra-toolbox
+        - setuptools
+        - pytest-runner
+
+    run:
+        - python >=3.6
+        - astra-toolbox
+
+about:
+    home: https://github.com/ahendriksen/tomosipo
+    license: GPL-3.0-only
+    license_file: LICENSE
+    summary: "A usable Python astra-based tomography library."
+
+extra:
+    maintainers:
+        - Allard Hendriksen

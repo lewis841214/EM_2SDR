@@ -1,0 +1,73 @@
+stages:
+  - build
+  - publish
+  - deploy
+
+build:
+  stage: build
+  image: continuumio/miniconda3
+  variables:
+  script:
+    - conda install -yq conda-build conda-verify
+    - conda build conda/ -c defaults -c astra-toolbox/label/dev
+    - mkdir -p artifacts
+    - mv /opt/conda/conda-bld/noarch/tomosipo*.tar.bz2 artifacts/
+  artifacts:
+    paths:
+    - artifacts/
+    expire_in: 7 days
+
+
+publish-dev:
+  stage: publish
+  image: continuumio/miniconda3
+  only:
+  - develop
+  # Only publish when this has been manually requested. We want to be a good
+  # anaconda citizen, and not publish each and every commit of the package.
+  when: manual
+  variables:
+    ANACONDA_USERNAME: $ANACONDA_USERNAME
+    ANACONDA_PASSWORD: $ANACONDA_PASSWORD
+  script:
+    - conda install -yq anaconda-client
+    - set +x
+    - anaconda login --username "$ANACONDA_USERNAME" --password "$ANACONDA_PASSWORD" --hostname $(cat /dev/urandom | base32 | head -c 32)
+    - set -x
+    - anaconda upload --label dev artifacts/*.bz2
+    - anaconda logout
+
+publish-release:
+  stage: publish
+  image: continuumio/miniconda3
+  only:
+  - tags
+  variables:
+    ANACONDA_USERNAME: $ANACONDA_USERNAME
+    ANACONDA_PASSWORD: $ANACONDA_PASSWORD
+  script:
+    - conda install -yq anaconda-client
+    - set +x
+    - anaconda login --username "$ANACONDA_USERNAME" --password "$ANACONDA_PASSWORD" --hostname $(cat /dev/urandom | base32 | head -c 32)
+    - set -x
+    - anaconda upload artifacts/*.bz2
+    - anaconda logout
+
+pages:
+  stage: deploy
+  image: pytorch/manylinux-cuda92
+  script:
+    - yum install mesa-libGL-devel -y # pyopengl requires an installed opengl lib.
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O install_conda.sh
+    - bash install_conda.sh -b
+    - export PATH="$HOME/miniconda3/bin:$PATH"
+    - conda install python=3.7 cudatoolkit=9.2 astra-toolbox pyqtgraph pyqt pyopengl pytorch ffmpeg ffmpeg-python matplotlib sphinx ipython sphinx_rtd_theme recommonmark -c defaults -c astra-toolbox/label/dev -c conda-forge -yq
+    - pip install .[dev]
+    - sphinx-apidoc -M -f -e --tocfile api_reference -H "API Reference" --ext-autodoc -o doc/ref/ tomosipo
+    - sphinx-build -b html doc/ public
+    - python -msphinx -b doctest doc ./doctest-output # Run doctest
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
