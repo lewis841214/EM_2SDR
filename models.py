@@ -483,7 +483,7 @@ class EM_2SDR():
         true_index = self.true_index
         #num_batch = int(9200 / self.batch_size)
 
-        num_batch = 4
+        num_batch = 1
         self.Output_colection(num_batch)
         indexs = true_index[-num_batch * self.batch_size:]
         np.random.seed(0)
