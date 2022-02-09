@@ -12,3 +12,6 @@ doc/ref/tomosipo*.rst
 data/
 data/*.h5
 snap_shot/
+/snap_shot/
+TSNE_result/
+/TSNE_result/

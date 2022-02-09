@@ -386,7 +386,7 @@ class EM_2SDR():
         """
         
         temp = []
-        for i in range(1):
+        for i in range(3):
             
             order = np.random.permutation(self.num_image)
             
@@ -424,12 +424,13 @@ class EM_2SDR():
                 torch.save(self.U2, f'./snap_shot/{self.exp_name}_{i}th_{j}_U2.pt')
                 torch.save(self.U3, f'./snap_shot/{self.exp_name}_{i}th_{j}_U3.pt')
                 if j % 3 == 1:
-                    self.Draw_Kmean_tsne(j)
+                    self.Draw_Kmean_tsne(j+self.n_iter * i )
                 #self.Plot_temp()
-                if j % 6 == 5:
-                    print('ratio / 5')
-                    ratio = ratio / 10
+                #if j % 6 == 5:
+                #    print('ratio / 5')
+                #    ratio = ratio / 10
             #if i % 3 ==0:
+            ratio = ratio / 3
             print(f'the {i} th iter')
             #self.Plot_temp()
             
@@ -453,8 +454,9 @@ class EM_2SDR():
         
         temp = []
 
-        order = np.array([i for i in range(self.num_image)])[- n * self.batch_size:]
+        order = np.array([i for i in range(self.num_image)])[ :n * self.batch_size]
         for j in range(n):
+            print(f'output_collection {j}-th batch')
             batch_order = order[self.batch_size * j : self.batch_size * (j + 1) ]
             self.I = self.All_I[batch_order] 
             self.Images = self.All_Image[batch_order]
@@ -479,13 +481,13 @@ class EM_2SDR():
         self.All_mu = temp
         with open(f'./snap_shot/{self.exp_name}_all_mu.pkl', 'wb') as f:
             pickle.dump(self.All_mu , f)
-    def Draw_Kmean_tsne(self, iter_ ):
+    def Draw_Kmean_tsne(self, iter_, num_batch = 1 ):
         true_index = self.true_index
         #num_batch = int(9200 / self.batch_size)
 
-        num_batch = 1
+        num_batch = num_batch
         self.Output_colection(num_batch)
-        indexs = true_index[-num_batch * self.batch_size:]
+        indexs = true_index[:num_batch * self.batch_size]
         np.random.seed(0)
         Coef = np.array(self.All_mu)
         tsne = TSNE(n_components=2, verbose=1, random_state=123)
