@@ -368,7 +368,7 @@ class EM_2SDR():
         
         
         
-    def fit(self, start_ratio):
+    def fit(self, start_ratio, estimate = False):
         
         """
         If doing SGD, set self.I as part of the images, then the following code run aotumatically.
@@ -386,14 +386,16 @@ class EM_2SDR():
         """
         
         temp = []
-        for i in range(3):
+        for i in range(4):
             
             order = np.random.permutation(self.num_image)
             
-            
-            self.Draw_Kmean_tsne(0)
-            self.A_pro_All_U()
-            self.Plot_temp()
+            if estimate == False:
+                pass
+            #else:
+            #    self.Draw_Kmean_tsne(0)
+            #self.A_pro_All_U()
+            #self.Plot_temp()
             #for j in range(int(self.num_image / self.batch_size)):
             for j in range(1, self.n_iter+1):
                 #continue
@@ -424,14 +426,18 @@ class EM_2SDR():
                 torch.save(self.U2, f'./snap_shot/{self.exp_name}_{i}th_{j}_U2.pt')
                 torch.save(self.U3, f'./snap_shot/{self.exp_name}_{i}th_{j}_U3.pt')
                 if j % 3 == 1:
-                    self.Draw_Kmean_tsne(j+self.n_iter * i )
+                    if estimate == False:
+                        pass
+                    else:
+                        self.Draw_Kmean_tsne(j+self.n_iter * i)
+                    #self.Draw_Kmean_tsne(j+self.n_iter * i )
                 #self.Plot_temp()
                 #if j % 6 == 5:
                 #    print('ratio / 5')
                 #    ratio = ratio / 10
-            #if i % 3 ==0:
-            ratio = ratio / 3
-            print(f'the {i} th iter')
+            if i ==2:
+                ratio = ratio / 10
+            print(f'the {i} th iter, ratio = {ratio}', )
             #self.Plot_temp()
             
             temp.append([self.U1.data, self.U2.data, self.U3.data])
