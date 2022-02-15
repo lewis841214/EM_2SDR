@@ -425,6 +425,7 @@ class EM_2SDR():
                 torch.save(self.U1, f'./snap_shot/{self.exp_name}_{i}th_{j}_U1.pt')
                 torch.save(self.U2, f'./snap_shot/{self.exp_name}_{i}th_{j}_U2.pt')
                 torch.save(self.U3, f'./snap_shot/{self.exp_name}_{i}th_{j}_U3.pt')
+                self.iter = j+self.n_iter * i
                 if j % 3 == 1:
                     if estimate == False:
                         pass
@@ -485,7 +486,7 @@ class EM_2SDR():
             #self.Plot_temp()
             temp.extend(self.mu.detach().numpy().tolist())
         self.All_mu = temp
-        with open(f'./snap_shot/{self.exp_name}_all_mu.pkl', 'wb') as f:
+        with open(f'./snap_shot/{self.exp_name}_all_mu_{self.iter}.pkl', 'wb') as f:
             pickle.dump(self.All_mu , f)
     def Draw_Kmean_tsne(self, iter_, num_batch = 1 ):
         true_index = self.true_index
