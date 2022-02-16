@@ -489,6 +489,7 @@ class EM_2SDR():
         with open(f'./snap_shot/{self.exp_name}_all_mu_{self.iter}.pkl', 'wb') as f:
             pickle.dump(self.All_mu , f)
     def Draw_Kmean_tsne(self, iter_, num_batch = 1 ):
+        self.iter = iter_
         true_index = self.true_index
         #num_batch = int(9200 / self.batch_size)
 
