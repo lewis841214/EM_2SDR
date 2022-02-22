@@ -425,6 +425,8 @@ class EM_2SDR():
                 torch.save(self.U1, f'./snap_shot/{self.exp_name}_{i}th_{j}_U1.pt')
                 torch.save(self.U2, f'./snap_shot/{self.exp_name}_{i}th_{j}_U2.pt')
                 torch.save(self.U3, f'./snap_shot/{self.exp_name}_{i}th_{j}_U3.pt')
+                torch.save(self.Sigma_Z_inv, f'./snap_shot/{self.exp_name}_{i}th_{j}_Sigma_Z_inverse.pt')
+                torch.save(self.sigma, f'./snap_shot/{self.exp_name}_{i}th_{j}_sigma.pt')
                 self.iter = j+self.n_iter * i
                 if j % 3 == 1:
                     if estimate == False:
