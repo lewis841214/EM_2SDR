@@ -41,7 +41,7 @@ def Trace_bradcast(a):
 
 
 class EM_2SDR():
-    def __init__(self, ProjSize, num_image, n_component, op, Images,Orientation_Vectors, exp_name,mean_subtracted_strcut, true_index ,  batch_size = 1000, n_iter = 20):
+    def __init__(self, ProjSize, num_image, n_component, op, Images,Orientation_Vectors, exp_name,mean_subtracted_strcut, true_index ,  batch_size = 1000, n_iter = 20, PCA_n = 5):
         #init
         self.exp_name = exp_name
         self.ProjSize  = ProjSize
@@ -50,6 +50,7 @@ class EM_2SDR():
         self.n_component = n_component
         self.batch_size = batch_size
         self.n_iter = n_iter
+        self.PCA_n = PCA_n
 
         """
         The answer 
@@ -386,7 +387,7 @@ class EM_2SDR():
         """
         
         temp = []
-        for i in range(4):
+        for i in range(2):
             
             order = np.random.permutation(self.num_image)
             
@@ -407,7 +408,7 @@ class EM_2SDR():
                 
                 #Update op
                 Proj_geom = astra.create_proj_geom('parallel3d_vec', self.ProjSize, self.ProjSize, self.Orientation_Vectors[batch_order])
-                Vol_geom = astra.create_vol_geom(34, 34, 34)
+                Vol_geom = astra.create_vol_geom(self.ProjSize, self.ProjSize, self.ProjSize)
                 vg = ts.from_astra(Vol_geom)
                 pg = ts.from_astra(Proj_geom)
                 op = ts.operator(vg, pg)
@@ -432,7 +433,7 @@ class EM_2SDR():
                     if estimate == False:
                         pass
                     else:
-                        self.Draw_Kmean_tsne(j+self.n_iter * i)
+                        self.Draw_Kmean_tsne(j+self.n_iter * i, pca_n = self.PCA_n)
                     #self.Draw_Kmean_tsne(j+self.n_iter * i )
                 #self.Plot_temp()
                 #if j % 6 == 5:
@@ -450,7 +451,7 @@ class EM_2SDR():
             torch.save(self.U2, f'./snap_shot/{self.exp_name}_{i}th_U2.pt')
             torch.save(self.U3, f'./snap_shot/{self.exp_name}_{i}th_U3.pt')
             #use torch save to save torch tensor
-            self.Draw_Kmean_tsne(j)
+            self.Draw_Kmean_tsne(j , pca_n = self.PCA_n)
             
     def Output_colection(self, n = 8):
         
@@ -474,7 +475,7 @@ class EM_2SDR():
 
             #Update op
             Proj_geom = astra.create_proj_geom('parallel3d_vec', self.ProjSize, self.ProjSize, self.Orientation_Vectors[batch_order])
-            Vol_geom = astra.create_vol_geom(34, 34, 34)
+            Vol_geom = astra.create_vol_geom(self.ProjSize, self.ProjSize, self.ProjSize)
             vg = ts.from_astra(Vol_geom)
             pg = ts.from_astra(Proj_geom)
             op = ts.operator(vg, pg)
@@ -490,7 +491,7 @@ class EM_2SDR():
         self.All_mu = temp
         with open(f'./snap_shot/{self.exp_name}_all_mu_{self.iter}.pkl', 'wb') as f:
             pickle.dump(self.All_mu , f)
-    def Draw_Kmean_tsne(self, iter_, num_batch = 1 ):
+    def Draw_Kmean_tsne(self, iter_, num_batch = 1 , pca_n = 5):
         self.iter = iter_
         true_index = self.true_index
         #num_batch = int(9200 / self.batch_size)
@@ -502,15 +503,18 @@ class EM_2SDR():
         Coef = np.array(self.All_mu)
         tsne = TSNE(n_components=2, verbose=1, random_state=123)
         Coef = Coef.reshape(Coef.shape[0], -1)
-        pca = PCA(n_components=5)
+        pca = PCA(n_components=pca_n)
         pca.fit(Coef)
         P_Coef = pca.transform(Coef)
         self.P_Coef = P_Coef
         self.PCs = pca.components_
+        #Save components
+        with open(f'./snap_shot/{self.exp_name}_PCA_W_iter_{self.iter}.pkl', 'wb') as f:
+            pickle.dump(self.PCs, f)
         z = tsne.fit_transform(P_Coef) 
         self.Projected_var()
         
-        kmeans = KMeans(n_clusters=5, random_state=0).fit(P_Coef) #k-mean perform on PCA coef
+        kmeans = KMeans(n_clusters=pca_n, random_state=0).fit(P_Coef) #k-mean perform on PCA coef
         kmeans.labels_
         vs = v_measure_score(indexs, kmeans.labels_)
         df = pd.DataFrame()
@@ -519,7 +523,7 @@ class EM_2SDR():
         df["comp-2"] = z[:,1]
 
         sns.scatterplot(x="comp-1", y="comp-2", hue=df.y.tolist(),
-                        palette=sns.color_palette("hls", 5),
+                        palette=sns.color_palette("hls", pca_n),
                         data=df).set(title=f"n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} \n vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f} log_ori_var={torch.log(self.ori_var):.2f}") 
         os.makedirs(os.path.dirname(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} vm = {vs} log_proj_var ={torch.log(self.projected_var):.2f}.jpg'), exist_ok = True)
         plt.savefig(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f}.jpg')
@@ -533,7 +537,7 @@ class EM_2SDR():
         df["comp-2"] = z[:,1]
 
         sns.scatterplot(x="comp-1", y="comp-2", hue=df.y.tolist(),
-                        palette=sns.color_palette("hls", 5),
+                        palette=sns.color_palette("hls", pca_n),
                         data=df).set(title=f"n = {self.z_size} 5Ribsome data true_index at iter-{iter_}\n vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f} log_ori_var={torch.log(self.ori_var):.2f}") 
         plt.savefig(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data true_index at iter-{iter_} vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f}.jpg')
         plt.show()
@@ -554,11 +558,12 @@ class EM_2SDR():
         print('self.PCs.shape', self.PCs.shape)
         
         self.two_SDR_PCs = self.All_U_kron_shape @ self.PCs #V^3 x n_pcs
+        torch.save(self.two_SDR_PCs, f'./snap_shot/{self.exp_name}_{self.iter}th_2SDR_PCs.pt')
         #print(self.two_SDR_PCs.T @self.two_SDR_PCs  ) # chekced! orthonormal!
         ms_strucs = torch.tensor(ms_strucs)
         #print('ms_strucs', ms_strucs.shape)
         #print('self.n_component', self.n_component)
-        self.ms_strucs = reshape_fortran(ms_strucs, (5, self.ProjSize*self.ProjSize*self.ProjSize)).float()
+        self.ms_strucs = reshape_fortran(ms_strucs, (self.PCA_n, self.ProjSize*self.ProjSize*self.ProjSize)).float()
         self.ms_strucs = torch.permute(torch.tensor(self.ms_strucs), (1, 0))
         
         #print('original variance = ',torch.sum(self.ms_strucs * self.ms_strucs))
