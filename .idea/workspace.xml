@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="ffd58d65-ecb6-43e2-ab89-ed7a1c468b51" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/EMPCA_70S_ribsome_3DVA_EMPCA_mean_after_subtract_senior_mean_0308-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.ipynb_checkpoints/EMPCA_70S_ribsome_3DVA_EMPCA_mean_after_subtract_senior_mean_0308-checkpoint.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EMPCA_70S_ribsome_3DVA_EMPCA_mean_after_subtract_senior_mean_0308.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/EMPCA_70S_ribsome_3DVA_EMPCA_mean_after_subtract_senior_mean_0308.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Show_protein_structure.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Show_protein_structure.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.mrc" beforeDir="false" afterPath="$PROJECT_DIR$/test.mrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

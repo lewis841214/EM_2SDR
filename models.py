@@ -387,7 +387,7 @@ class EM_2SDR():
         """
         
         temp = []
-        for i in range(2):
+        for i in range(1):
             
             order = np.random.permutation(self.num_image)
             
@@ -488,6 +488,9 @@ class EM_2SDR():
             self.Expectation()
             #self.Plot_temp()
             temp.extend(self.mu.detach().numpy().tolist())
+            self.All_mu = temp
+            with open(f'./snap_shot/{self.exp_name}_all_mu_{self.iter}_{j}_batch.pkl', 'wb') as f:
+                pickle.dump(self.All_mu , f)
         self.All_mu = temp
         with open(f'./snap_shot/{self.exp_name}_all_mu_{self.iter}.pkl', 'wb') as f:
             pickle.dump(self.All_mu , f)
@@ -503,7 +506,7 @@ class EM_2SDR():
         Coef = np.array(self.All_mu)
         tsne = TSNE(n_components=2, verbose=1, random_state=123)
         Coef = Coef.reshape(Coef.shape[0], -1)
-        pca = PCA(n_components=pca_n)
+        pca = PCA(n_components=30)
         pca.fit(Coef)
         P_Coef = pca.transform(Coef)
         self.P_Coef = P_Coef
@@ -524,9 +527,9 @@ class EM_2SDR():
 
         sns.scatterplot(x="comp-1", y="comp-2", hue=df.y.tolist(),
                         palette=sns.color_palette("hls", pca_n),
-                        data=df).set(title=f"n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} \n vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f} log_ori_var={torch.log(self.ori_var):.2f}") 
-        os.makedirs(os.path.dirname(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} vm = {vs} log_proj_var ={torch.log(self.projected_var):.2f}.jpg'), exist_ok = True)
-        plt.savefig(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f}.jpg')
+                        data=df).set(title=f"n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} \n vm = {str(vs)[:6]}") 
+        os.makedirs(os.path.dirname(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} vm = {vs}.jpg'), exist_ok = True)
+        plt.savefig(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data k-mean at iter-{iter_} vm = {str(vs)[:6]} .jpg')
         plt.show()
         
         plt.close()
@@ -538,8 +541,8 @@ class EM_2SDR():
 
         sns.scatterplot(x="comp-1", y="comp-2", hue=df.y.tolist(),
                         palette=sns.color_palette("hls", pca_n),
-                        data=df).set(title=f"n = {self.z_size} 5Ribsome data true_index at iter-{iter_}\n vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f} log_ori_var={torch.log(self.ori_var):.2f}") 
-        plt.savefig(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data true_index at iter-{iter_} vm = {str(vs)[:6]} log_proj_var ={torch.log(self.projected_var):.2f}.jpg')
+                        data=df).set(title=f"n = {self.z_size} 5Ribsome data true_index at iter-{iter_}\n vm = {str(vs)[:6]} ") 
+        plt.savefig(f'./TSNE_result/{self.exp_name}/n = {self.z_size} 5Ribsome data true_index at iter-{iter_} vm = {str(vs)[:6]}.jpg')
         plt.show()
         plt.close()
         
@@ -563,6 +566,7 @@ class EM_2SDR():
         ms_strucs = torch.tensor(ms_strucs)
         #print('ms_strucs', ms_strucs.shape)
         #print('self.n_component', self.n_component)
+        """
         self.ms_strucs = reshape_fortran(ms_strucs, (self.PCA_n, self.ProjSize*self.ProjSize*self.ProjSize)).float()
         self.ms_strucs = torch.permute(torch.tensor(self.ms_strucs), (1, 0))
         
@@ -578,4 +582,5 @@ class EM_2SDR():
         print('self.ori_var_each', self.ori_var_each/(1e12))
         print('self.projected_var_each', self.projected_var_each/(1e12))
         
-        
+        """
+
